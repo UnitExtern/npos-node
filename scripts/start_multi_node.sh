@@ -19,7 +19,7 @@ cd ./scripts/session_keys
 ./run.sh
 cd ../../
 
-./target/release/clarus-node \
+./target/release/npos-node \
   --chain clarus \
   -d data/validator1 \
   --name validator1 \
@@ -33,7 +33,7 @@ cd ../../
   --blocks-pruning archive \
   --node-key 0x74a8cfbadb5d2b0178ec124791bfa8346ac3550a4f689923c806428090055277 &> data/log.txt &
 
-./target/release/clarus-node \
+./target/release/npos-node \
   --chain clarus \
   -d data/validator2 \
   --name validator2 \
@@ -47,7 +47,7 @@ cd ../../
   --blocks-pruning archive \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWRm651Kd5GmsLTHJbgX5chQS5npx9ttLgo46UsegCMoNM &> /dev/null &
 
-./target/release/clarus-node \
+./target/release/npos-node \
   --chain clarus \
   -d data/validator3 \
   --name validator3 \
