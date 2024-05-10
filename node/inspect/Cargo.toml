@@ -8,16 +8,28 @@ homepage = "https://github.com/immanuel-unit/npos-node.git"
 repository = "https://github.com/immanuel-unit/npos-node.git"
 edition = "2021"
 
+[lints]
+workspace = true
+
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-clap = { version = "4.4.6", features = ["derive"] }
+clap = { version = "4.5.1", features = ["derive"] }
 codec = { package = "parity-scale-codec", version = "3.6.1" }
-thiserror = "1.0"
-sc-cli = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "v1.4.0" }
-sc-client-api = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "v1.4.0" }
-sc-service = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "v1.4.0", default-features = false}
-sp-blockchain = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "v1.4.0" }
-sp-core = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "v1.4.0" }
-sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "v1.4.0" }
+thiserror = { workspace = true }
+sc-cli = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0" }
+sc-client-api = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0" }
+sc-service = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false}
+sp-blockchain = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0" }
+sp-core = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0" }
+sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0" }
+sp-io = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0" }
+sp-statement-store = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0" }
+
+
+[features]
+runtime-benchmarks = [
+	"sc-service/runtime-benchmarks",
+	"sp-runtime/runtime-benchmarks",
+]

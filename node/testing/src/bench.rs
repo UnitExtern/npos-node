@@ -43,12 +43,12 @@ use sc_block_builder::BlockBuilderBuilder;
 use sc_client_api::{execution_extensions::ExecutionExtensions, UsageProvider};
 use sc_client_db::PruningMode;
 use sc_consensus::{BlockImport, BlockImportParams, ForkChoiceStrategy, ImportResult, ImportedAux};
-use sc_executor::{NativeElseWasmExecutor, WasmExecutionMethod, WasmtimeInstantiationStrategy};
+use sc_executor::{WasmExecutionMethod, WasmtimeInstantiationStrategy};
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_consensus::BlockOrigin;
-use sp_core::{blake2_256, ed25519, sr25519, traits::SpawnNamed, Pair, Public};
-use sp_inherents::InherentData;
+use sp_core::{ed25519, sr25519, traits::SpawnNamed, Pair, Public};
+use sp_crypto_hashing::blake2_256;use sp_inherents::InherentData;
 use sp_runtime::{
     traits::{Block as BlockT, IdentifyAccount, Verify},
     OpaqueExtrinsic,
@@ -420,13 +420,11 @@ impl BenchDb {
         let task_executor = TaskExecutor::new();
 
         let backend = sc_service::new_db_backend(db_config).expect("Should not fail");
-        let executor = NativeElseWasmExecutor::new_with_wasm_executor(
-            sc_executor::WasmExecutor::builder()
-                .with_execution_method(WasmExecutionMethod::Compiled {
-                    instantiation_strategy: WasmtimeInstantiationStrategy::PoolingCopyOnWrite,
-                })
-                .build(),
-        );
+        let executor = sc_executor::WasmExecutor::builder()
+			.with_execution_method(WasmExecutionMethod::Compiled {
+				instantiation_strategy: WasmtimeInstantiationStrategy::PoolingCopyOnWrite,
+			})
+			.build();
 
         let client_config = sc_service::ClientConfig::default();
         let genesis_block_builder = sc_service::GenesisBlockBuilder::new(
@@ -622,8 +620,7 @@ impl BenchKeyring {
                     .expect("Account id not found in keyring");
                 let signature = payload.using_encoded(|b| {
                     if b.len() > 256 {
-                        key.sign(&sp_io::hashing::blake2_256(b))
-                    } else {
+						key.sign(&blake2_256(b))                    } else {
                         key.sign(b)
                     }
                 });

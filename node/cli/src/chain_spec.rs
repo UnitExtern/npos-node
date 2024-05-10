@@ -21,6 +21,7 @@
 use clarus_runtime::{
     constants::currency::*, wasm_binary_unwrap, Block, MaxNominations, SessionKeys, StakerStatus,
 };
+use sp_consensus_beefy::ecdsa_crypto::AuthorityId as BeefyId;
 use grandpa_primitives::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_chain_spec::ChainSpecExtension;
@@ -64,18 +65,14 @@ pub struct Extensions {
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig, Extensions>;
 
 fn session_keys(
-    grandpa: GrandpaId,
-    babe: BabeId,
-    im_online: ImOnlineId,
-    authority_discovery: AuthorityDiscoveryId,
-    mixnet: MixnetId,
+	grandpa: GrandpaId,
+	babe: BabeId,
+	im_online: ImOnlineId,
+	authority_discovery: AuthorityDiscoveryId,
+	mixnet: MixnetId,
+	beefy: BeefyId,
 ) -> SessionKeys {
-    SessionKeys {
-        grandpa,
-        babe,
-        im_online,
-        authority_discovery,
-    }
+	SessionKeys { grandpa, babe, im_online, authority_discovery, mixnet, beefy }
 }
 
 fn configure_accounts_for_clarus_testnet() -> (
@@ -87,6 +84,7 @@ fn configure_accounts_for_clarus_testnet() -> (
         ImOnlineId,
         AuthorityDiscoveryId,
         MixnetId,
+        BeefyId,
     )>,
     AccountId,
     Vec<AccountId>,
@@ -108,6 +106,7 @@ fn configure_accounts_for_clarus_testnet() -> (
 		ImOnlineId,
 		AuthorityDiscoveryId,
 		MixnetId,
+        BeefyId,
 	)> = vec![
         (
 			// 5FNCTJVDxfFnmUYKHqbJHjUi7UFbZ6pzC39sL6E5RVpB4vc9
@@ -129,6 +128,9 @@ fn configure_accounts_for_clarus_testnet() -> (
             // 5Eeard4qtNM8DBvqDEKn5GBAspbT7QEvhAjxSsYePB26XAiJ
 			array_bytes::hex2array_unchecked("724f3e6ec8a61ea3dc5b76c00a049f84fd7f212443b01241e0a2bb4ce503b345")
             .unchecked_into(),
+            // 5DMLFcDdLLQbw696YfHaWBpQR99HwR456ycSCfr6L7KXGYK8
+			array_bytes::hex2array_unchecked("035560fafa241739869360aa4b32bc98953172ceb41a19c6cc1a27962fb3d1ecec")
+            .unchecked_into(),
 		),
 		(
 			// 5DP3mCevjzqrYhJgPpQFkpoERKg55K422u5KiRGPQaoJEgRH
@@ -149,6 +151,9 @@ fn configure_accounts_for_clarus_testnet() -> (
 				.unchecked_into(),
             // 5DhZENrJzzaJL2MwLsQsvxARhhAPCVXdHxs2oSJuJLxhUsbg
 			array_bytes::hex2array_unchecked("485746d4cc0f20b5581f24b30f91b34d49a7b96b85bb8ba202f354aea8e14b1f")
+            .unchecked_into(),
+            // 5FYk11kNtB4178wLKJ2RNoUzzcjgRUciFe3SJDVZXhqX4dzG
+			array_bytes::hex2array_unchecked("02da1ab255ed888ee3e19b73d335fc13160b3eb10456c2d17c6a8ea7de403d2445")
             .unchecked_into(),
 		),
 		(
@@ -236,25 +241,19 @@ where
 
 /// Helper function to generate stash, controller and session key from seed.
 pub fn authority_keys_from_seed(
-    seed: &str,
-) -> (
-    AccountId,
-    AccountId,
-    GrandpaId,
-    BabeId,
-    ImOnlineId,
-    AuthorityDiscoveryId,
-    MixnetId,
-) {
-    (
-        get_account_id_from_seed::<sr25519::Public>(&format!("{}//stash", seed)),
-        get_account_id_from_seed::<sr25519::Public>(seed),
-        get_from_seed::<GrandpaId>(seed),
-        get_from_seed::<BabeId>(seed),
-        get_from_seed::<ImOnlineId>(seed),
-        get_from_seed::<AuthorityDiscoveryId>(seed),
-        get_from_seed::<MixnetId>(seed),
-    )
+	seed: &str,
+) -> (AccountId, AccountId, GrandpaId, BabeId, ImOnlineId, AuthorityDiscoveryId, MixnetId, BeefyId)
+{
+	(
+		get_account_id_from_seed::<sr25519::Public>(&format!("{}//stash", seed)),
+		get_account_id_from_seed::<sr25519::Public>(seed),
+		get_from_seed::<GrandpaId>(seed),
+		get_from_seed::<BabeId>(seed),
+		get_from_seed::<ImOnlineId>(seed),
+		get_from_seed::<AuthorityDiscoveryId>(seed),
+		get_from_seed::<MixnetId>(seed),
+		get_from_seed::<BeefyId>(seed),
+	)
 }
 
 fn configure_accounts(
@@ -266,6 +265,7 @@ fn configure_accounts(
         ImOnlineId,
         AuthorityDiscoveryId,
         MixnetId,
+        BeefyId,
     )>,
     initial_nominators: Vec<AccountId>,
     endowed_accounts: Option<Vec<AccountId>>,
@@ -279,6 +279,7 @@ fn configure_accounts(
         ImOnlineId,
         AuthorityDiscoveryId,
         MixnetId,
+        BeefyId,
     )>,
     Vec<AccountId>,
     usize,
@@ -355,6 +356,7 @@ pub fn testnet_genesis(
         ImOnlineId,
         AuthorityDiscoveryId,
         MixnetId,
+        BeefyId,
     )>,
     initial_nominators: Vec<AccountId>,
     root_key: AccountId,
@@ -384,6 +386,7 @@ pub fn testnet_genesis(
                             x.4.clone(),
                             x.5.clone(),
                             x.6.clone(),
+                            x.7.clone(),
                         ),
                     )
                 })

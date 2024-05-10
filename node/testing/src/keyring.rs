@@ -19,10 +19,12 @@
 //! Test accounts.
 
 use clarus_runtime::{CheckedExtrinsic, SessionKeys, SignedExtra, UncheckedExtrinsic};
+use node_cli::chain_spec::get_from_seed;
 use codec::Encode;
 use node_primitives::{AccountId, Balance, Nonce};
-use sp_keyring::{AccountKeyring, Ed25519Keyring, Sr25519Keyring};
-use sp_runtime::generic::Era;
+use sp_core::{ecdsa, ed25519, sr25519};
+use sp_crypto_hashing::blake2_256;
+use sp_keyring::AccountKeyring;use sp_runtime::generic::Era;
 
 /// Alice's account id.
 pub fn alice() -> AccountId {
@@ -54,11 +56,7 @@ pub fn ferdie() -> AccountId {
     AccountKeyring::Ferdie.into()
 }
 
-/// Convert keyrings into `SessionKeys`.
-pub fn to_session_keys(
-    ed25519_keyring: &Ed25519Keyring,
-    sr25519_keyring: &Sr25519Keyring,
-) -> SessionKeys {
+pub fn session_keys_from_seed(seed: &str) -> SessionKeys {
     SessionKeys {
         grandpa: ed25519_keyring.to_owned().public().into(),
         babe: sr25519_keyring.to_owned().public().into(),
@@ -99,15 +97,16 @@ pub fn sign(
                 genesis_hash,
             );
             let key = AccountKeyring::from_account_id(&signed).unwrap();
-            let signature = payload
-                .using_encoded(|b| {
-                    if b.len() > 256 {
-                        key.sign(&sp_io::hashing::blake2_256(b))
-                    } else {
-                        key.sign(b)
-                    }
-                })
-                .into();
+            let signature =
+				payload
+					.using_encoded(|b| {
+						if b.len() > 256 {
+							key.sign(&blake2_256(b))
+						} else {
+							key.sign(b)
+						}
+					})
+					.into();
             UncheckedExtrinsic {
                 signature: Some((sp_runtime::MultiAddress::Id(signed), signature, extra)),
                 function: payload.0,
